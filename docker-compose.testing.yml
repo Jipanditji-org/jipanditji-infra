@@ -1,0 +1,60 @@
+name: jipanditji-testing
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: jipanditji-mysql-testing
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: jipanditji_test
+      MYSQL_USER: jipanditji
+      MYSQL_PASSWORD: jipanditji_test_password
+      MYSQL_ROOT_PASSWORD: root_test_password
+    ports:
+      - "3307:3306"
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot_test_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - jipanditji-testing
+
+  redis:
+    image: redis:7-alpine
+    container_name: jipanditji-redis-testing
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6380:6379"
+    networks:
+      - jipanditji-testing
+
+  backend:
+    build:
+      context: ../pw-backend
+    container_name: jipanditji-backend-testing
+    restart: unless-stopped
+    env_file:
+      - ./env/backend.dev.env
+    environment:
+      NODE_ENV: test
+      DATABASE_NAME: jipanditji_test
+      DATABASE_HOST: mysql
+      DATABASE_USERNAME: jipanditji
+      DATABASE_PASSWORD: jipanditji_test_password
+    ports:
+      - "5002:5001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - jipanditji-testing
+
+networks:
+  jipanditji-testing:
+    driver: bridge

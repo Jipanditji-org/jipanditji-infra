@@ -1,0 +1,85 @@
+name: jipanditji-prod
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: jipanditji-redis-prod
+    restart: unless-stopped
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis_prod_data:/data
+    networks:
+      - jipanditji-prod
+
+  backend:
+    build:
+      context: ../pw-backend
+    container_name: jipanditji-backend-prod
+    restart: unless-stopped
+    env_file:
+      - ./env/backend.prod.env
+    expose:
+      - "5001"
+    volumes:
+      - backend_uploads_prod:/app/uploads
+      - backend_temp_prod:/app/temp
+    depends_on:
+      - redis
+    networks:
+      - jipanditji-prod
+
+  coreweb:
+    build:
+      context: ../jp-coreweb
+    container_name: jipanditji-coreweb-prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_BACKEND_HOSTED_URL: https://api.jipanditji.com
+    expose:
+      - "3000"
+    depends_on:
+      - backend
+    networks:
+      - jipanditji-prod
+
+  toolbox:
+    build:
+      context: ../toolbox-web
+    container_name: jipanditji-toolbox-prod
+    restart: unless-stopped
+    command: ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "3000"]
+    environment:
+      NODE_ENV: production
+      VITE_BACKEND_HOSTED_URL: https://api.jipanditji.com
+    expose:
+      - "3000"
+    depends_on:
+      - backend
+    networks:
+      - jipanditji-prod
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: jipanditji-nginx-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/prod.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - coreweb
+      - toolbox
+      - backend
+    networks:
+      - jipanditji-prod
+
+volumes:
+  redis_prod_data:
+  backend_uploads_prod:
+  backend_temp_prod:
+
+networks:
+  jipanditji-prod:
+    driver: bridge

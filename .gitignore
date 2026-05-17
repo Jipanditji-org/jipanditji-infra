@@ -1,0 +1,8 @@
+.DS_Store
+backups/
+*.log
+*.tmp
+
+# Keep env templates in this infra repo, but ignore local overrides.
+env/*.local
+env/*.secret
