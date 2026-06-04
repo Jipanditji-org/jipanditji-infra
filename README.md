@@ -96,6 +96,7 @@ replaces the VPS-level Nginx reverse proxy and listens on host ports `80` and
 
 Routes:
 
+- `cdn.backend.jipanditji.com` -> public uploads and protected WebDAV uploads
 - `dev.backend.jipanditji.com` -> dev backend on `localhost:5001` with HTTPS
 - `testing.backend.jipanditji.com` -> testing backend on `localhost:5002` with HTTPS
 - `backendjipanditji.com` -> production backend on `localhost:5003`
@@ -107,8 +108,16 @@ Routes:
 - `toolbox.jipanditji.com` -> production toolbox on `localhost:5176`
 
 The proxy mounts `/etc/letsencrypt` from the VPS for the existing backend SSL
-certificates. Keep those certificates on the host, or recreate them before
-starting the proxy.
+and CDN certificates. Keep those certificates on the host, or recreate them
+before starting the proxy.
+
+The CDN/WebDAV config also mounts:
+
+- `/var/www/jipanditji/uploads` -> public files and WebDAV storage
+- `/etc/nginx/.htpasswd` -> WebDAV basic-auth users
+
+You can override these paths with `CDN_UPLOADS_PATH` and `CDN_HTPASSWD_PATH`
+when starting `docker-compose.proxy.yml`.
 
 ## Production
 
