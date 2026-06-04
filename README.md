@@ -12,7 +12,6 @@ jipanditji-docker/
 │   ├── docker-compose.prod.yml
 │   ├── docker-compose.proxy.yml
 │   ├── docker-compose.testing.yml
-│   ├── env/
 │   ├── nginx/
 │   ├── redis/
 │   └── scripts/
@@ -80,9 +79,11 @@ Services:
 - Nginx toolbox proxy: `http://toolbox.testing.localhost:8081`
 - Redis: `localhost:6380`
 
-Testing env files live in `jipanditji-infra/env/*.testing.env`. The backend
-also loads the ignored `pw-backend/.env.test` file for testing-only secrets and
-hosted MySQL credentials.
+Testing env files live in each app repository:
+
+- `pw-backend/.env.testing`
+- `jp-coreweb/.env.testing`
+- `toolbox-web/.env.testing`
 
 ## Docker edge proxy
 
@@ -121,8 +122,12 @@ when starting `docker-compose.proxy.yml`.
 
 ## Production
 
-Before production deployment, edit `env/backend.prod.env` and replace all
-placeholder values with real production values from a secure secret store.
+Before production deployment, edit the app repo production env files and replace
+all placeholder values with real production values from a secure secret store:
+
+- `pw-backend/.env.prod`
+- `jp-coreweb/.env.prod`
+- `toolbox-web/.env.prod`
 
 ```bash
 ./jipanditji-infra/scripts/deploy.sh prod

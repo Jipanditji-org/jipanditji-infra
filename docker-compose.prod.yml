@@ -25,7 +25,7 @@ services:
     container_name: jipanditji-backend-prod
     restart: unless-stopped
     env_file:
-      - ./env/backend.prod.env
+      - ../pw-backend/.env.prod
     ports:
       - "${BACKEND_HOST_PORT:-5003}:5001"
     volumes:
@@ -43,12 +43,13 @@ services:
       dockerfile: Dockerfile
       target: production
       args:
-        NEXT_PUBLIC_BACKEND_HOSTED_URL: http://backend.jipanditji.com
+        APP_ENV: prod
     container_name: jipanditji-coreweb-prod
     restart: unless-stopped
+    env_file:
+      - ../jp-coreweb/.env.prod
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_BACKEND_HOSTED_URL: http://backend.jipanditji.com
     ports:
       - "${COREWEB_HOST_PORT:-3002}:3000"
     depends_on:
@@ -62,12 +63,13 @@ services:
       dockerfile: Dockerfile
       target: production
       args:
-        VITE_BACKEND_HOSTED_URL: http://backend.jipanditji.com
+        APP_ENV: prod
     container_name: jipanditji-toolbox-prod
     restart: unless-stopped
+    env_file:
+      - ../toolbox-web/.env.prod
     environment:
       NODE_ENV: production
-      VITE_BACKEND_HOSTED_URL: http://backend.jipanditji.com
     ports:
       - "${TOOLBOX_HOST_PORT:-5176}:80"
     depends_on:

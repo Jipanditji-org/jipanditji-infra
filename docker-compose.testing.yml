@@ -28,20 +28,7 @@ services:
     restart: unless-stopped
     command: ["npm", "run", "dev"]
     env_file:
-      - ./env/backend.testing.env
-      - ../pw-backend/.env.test
-    environment:
-      NODE_ENV: testing
-      PORT: 5001
-      REDIS_ENABLED: "true"
-      REDIS_REQUIRED: "false"
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      FRONTEND_URL: http://testing.jipanditji.com
-      BACKEND_URL: https://testing.backend.jipanditji.com
-      CDN_UPLOAD_URL: https://cdn.backend.jipanditji.com/protected
-      CDN_PUBLIC_URL: https://cdn.backend.jipanditji.com
-      CRON_ENABLED: "false"
+      - ../pw-backend/.env.testing
     ports:
       - "${BACKEND_HOST_PORT:-5002}:5001"
     depends_on:
@@ -64,7 +51,7 @@ services:
     restart: unless-stopped
     command: ["npm", "run", "dev"]
     env_file:
-      - ./env/frontend.testing.env
+      - ../jp-coreweb/.env.testing
     ports:
       - "${COREWEB_HOST_PORT:-3001}:3000"
     depends_on:
@@ -85,7 +72,7 @@ services:
     restart: unless-stopped
     command: ["npm", "run", "start", "--", "--host", "0.0.0.0"]
     env_file:
-      - ./env/toolbox.testing.env
+      - ../toolbox-web/.env.testing
     ports:
       - "${TOOLBOX_HOST_PORT:-5175}:5173"
     depends_on:

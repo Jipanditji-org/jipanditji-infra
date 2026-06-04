@@ -29,18 +29,6 @@ services:
     command: ["npm", "run", "dev"]
     env_file:
       - ../pw-backend/.env.dev
-    environment:
-      NODE_ENV: development
-      PORT: 5001
-      REDIS_ENABLED: "true"
-      REDIS_REQUIRED: "false"
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      FRONTEND_URL: http://dev.jipanditji.com
-      BACKEND_URL: https://dev.backend.jipanditji.com
-      CDN_UPLOAD_URL: https://cdn.backend.jipanditji.com/protected
-      CDN_PUBLIC_URL: https://cdn.backend.jipanditji.com
-      CRON_ENABLED: "false"
     ports:
       - "${BACKEND_HOST_PORT:-5001}:5001"
     depends_on:
@@ -63,7 +51,7 @@ services:
     restart: unless-stopped
     command: ["npm", "run", "dev"]
     env_file:
-      - ./env/frontend.dev.env
+      - ../jp-coreweb/.env.dev
     ports:
       - "${COREWEB_HOST_PORT:-3000}:3000"
     depends_on:
@@ -84,7 +72,7 @@ services:
     restart: unless-stopped
     command: ["npm", "run", "start", "--", "--host", "0.0.0.0"]
     env_file:
-      - ./env/toolbox.dev.env
+      - ../toolbox-web/.env.dev
     ports:
       - "${TOOLBOX_HOST_PORT:-5174}:5173"
     depends_on:
