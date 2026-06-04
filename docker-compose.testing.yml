@@ -1,59 +1,122 @@
-name: jipanditji-testing
+name: jipanditji-testing #running command :  `docker compose -f jipanditji-infra/docker-compose.testing.yml up -d --build`
 
 services:
-  mysql:
-    image: mysql:8.4
-    container_name: jipanditji-mysql-testing
+  redis:
+    image: redis:7-alpine
+    container_name: jipanditji-redis-testing
     restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: jipanditji_test
-      MYSQL_USER: jipanditji
-      MYSQL_PASSWORD: jipanditji_test_password
-      MYSQL_ROOT_PASSWORD: root_test_password
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     ports:
-      - "3307:3306"
-    tmpfs:
-      - /var/lib/mysql
+      - "${REDIS_HOST_PORT:-6380}:6379"
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis_testing_data:/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot_test_password"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 10
     networks:
       - jipanditji-testing
 
-  redis:
-    image: redis:7-alpine
-    container_name: jipanditji-redis-testing
-    restart: unless-stopped
-    command: ["redis-server", "--save", "", "--appendonly", "no"]
-    ports:
-      - "6380:6379"
-    networks:
-      - jipanditji-testing
-
   backend:
     build:
       context: ../pw-backend
+      dockerfile: Dockerfile
+      target: development
     container_name: jipanditji-backend-testing
     restart: unless-stopped
+    command: ["npm", "run", "dev"]
     env_file:
-      - ./env/backend.dev.env
+      - ./env/backend.testing.env
+      - ../pw-backend/.env.test
     environment:
-      NODE_ENV: test
-      DATABASE_NAME: jipanditji_test
-      DATABASE_HOST: mysql
-      DATABASE_USERNAME: jipanditji
-      DATABASE_PASSWORD: jipanditji_test_password
+      NODE_ENV: testing
+      PORT: 5001
+      REDIS_ENABLED: "true"
+      REDIS_REQUIRED: "false"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      FRONTEND_URL: http://testing.jipanditji.com
+      BACKEND_URL: https://testing.backend.jipanditji.com
+      CRON_ENABLED: "false"
     ports:
-      - "5002:5001"
+      - "${BACKEND_HOST_PORT:-5002}:5001"
     depends_on:
-      mysql:
-        condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
+    volumes:
+      - ../pw-backend:/app
+      - backend_node_modules_testing:/app/node_modules
+      - backend_uploads_testing:/app/uploads
+      - backend_temp_testing:/app/temp
     networks:
       - jipanditji-testing
+
+  coreweb:
+    build:
+      context: ../jp-coreweb
+      dockerfile: Dockerfile
+      target: development
+    container_name: jipanditji-coreweb-testing
+    restart: unless-stopped
+    command: ["npm", "run", "dev"]
+    env_file:
+      - ./env/frontend.testing.env
+    ports:
+      - "${COREWEB_HOST_PORT:-3001}:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ../jp-coreweb:/app
+      - coreweb_node_modules_testing:/app/node_modules
+      - coreweb_next_testing:/app/.next
+    networks:
+      - jipanditji-testing
+
+  toolbox:
+    build:
+      context: ../toolbox-web
+      dockerfile: Dockerfile
+      target: development
+    container_name: jipanditji-toolbox-testing
+    restart: unless-stopped
+    command: ["npm", "run", "start", "--", "--host", "0.0.0.0"]
+    env_file:
+      - ./env/toolbox.testing.env
+    ports:
+      - "${TOOLBOX_HOST_PORT:-5175}:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ../toolbox-web:/app
+      - toolbox_node_modules_testing:/app/node_modules
+    networks:
+      - jipanditji-testing
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: jipanditji-nginx-testing
+    restart: unless-stopped
+    ports:
+      - "${NGINX_HOST_PORT:-8081}:80"
+    volumes:
+      - ./nginx/testing.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - coreweb
+      - toolbox
+      - backend
+    networks:
+      - jipanditji-testing
+
+volumes:
+  redis_testing_data:
+  backend_node_modules_testing:
+  backend_uploads_testing:
+  backend_temp_testing:
+  coreweb_node_modules_testing:
+  coreweb_next_testing:
+  toolbox_node_modules_testing:
 
 networks:
   jipanditji-testing:

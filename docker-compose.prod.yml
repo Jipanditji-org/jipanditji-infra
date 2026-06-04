@@ -1,4 +1,4 @@
-name: jipanditji-prod
+name: jipanditji-prod #running command :  `docker compose -f jipanditji-infra/docker-compose.prod.yml up -d --build`
 
 services:
   redis:
@@ -9,36 +9,48 @@ services:
     volumes:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
       - redis_prod_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     networks:
       - jipanditji-prod
 
   backend:
     build:
       context: ../pw-backend
+      dockerfile: Dockerfile
+      target: production
     container_name: jipanditji-backend-prod
     restart: unless-stopped
     env_file:
       - ./env/backend.prod.env
-    expose:
-      - "5001"
+    ports:
+      - "${BACKEND_HOST_PORT:-5003}:5001"
     volumes:
       - backend_uploads_prod:/app/uploads
       - backend_temp_prod:/app/temp
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     networks:
       - jipanditji-prod
 
   coreweb:
     build:
       context: ../jp-coreweb
+      dockerfile: Dockerfile
+      target: production
+      args:
+        NEXT_PUBLIC_BACKEND_HOSTED_URL: http://backend.jipanditji.com
     container_name: jipanditji-coreweb-prod
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_BACKEND_HOSTED_URL: https://api.jipanditji.com
-    expose:
-      - "3000"
+      NEXT_PUBLIC_BACKEND_HOSTED_URL: http://backend.jipanditji.com
+    ports:
+      - "${COREWEB_HOST_PORT:-3002}:3000"
     depends_on:
       - backend
     networks:
@@ -47,14 +59,17 @@ services:
   toolbox:
     build:
       context: ../toolbox-web
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_BACKEND_HOSTED_URL: http://backend.jipanditji.com
     container_name: jipanditji-toolbox-prod
     restart: unless-stopped
-    command: ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "3000"]
     environment:
       NODE_ENV: production
-      VITE_BACKEND_HOSTED_URL: https://api.jipanditji.com
-    expose:
-      - "3000"
+      VITE_BACKEND_HOSTED_URL: http://backend.jipanditji.com
+    ports:
+      - "${TOOLBOX_HOST_PORT:-5176}:80"
     depends_on:
       - backend
     networks:
@@ -65,7 +80,7 @@ services:
     container_name: jipanditji-nginx-prod
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "${NGINX_HOST_PORT:-8082}:80"
     volumes:
       - ./nginx/prod.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:

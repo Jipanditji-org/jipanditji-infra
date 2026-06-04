@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ENVIRONMENT="${1:-prod}"
+ENVIRONMENT="${1:-dev}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 case "$ENVIRONMENT" in
@@ -14,8 +14,11 @@ case "$ENVIRONMENT" in
   testing|test)
     COMPOSE_FILE="$ROOT_DIR/docker-compose.testing.yml"
     ;;
+  proxy|nginx|edge)
+    COMPOSE_FILE="$ROOT_DIR/docker-compose.proxy.yml"
+    ;;
   *)
-    echo "Usage: $0 [dev|prod|testing]"
+    echo "Usage: $0 [dev|prod|testing|proxy]"
     exit 1
     ;;
 esac

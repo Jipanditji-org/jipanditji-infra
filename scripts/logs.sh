@@ -15,8 +15,11 @@ case "$ENVIRONMENT" in
   testing|test)
     COMPOSE_FILE="$ROOT_DIR/docker-compose.testing.yml"
     ;;
+  proxy|nginx|edge)
+    COMPOSE_FILE="$ROOT_DIR/docker-compose.proxy.yml"
+    ;;
   *)
-    echo "Usage: $0 [dev|prod|testing] [service]"
+    echo "Usage: $0 [dev|prod|testing|proxy] [service]"
     exit 1
     ;;
 esac
