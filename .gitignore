@@ -6,3 +6,14 @@ backups/
 # Keep env templates in this infra repo, but ignore local overrides.
 env/*.local
 env/*.secret
+env/*.override
+
+# Local cert/auth copies should stay on the VPS, not in git.
+*.pem
+*.key
+.htpasswd
+
+# Docker/runtime noise
+.env
+.env.local
+.env.*.local
