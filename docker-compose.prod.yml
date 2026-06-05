@@ -45,6 +45,7 @@ services:
       args:
         APP_ENV: prod
         NEXT_PUBLIC_BACKEND_HOSTED_URL: https://backend.jipanditji.com
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-226059950968-fcelide192sipt7k8eem2idvlsbqft88.apps.googleusercontent.com}
     container_name: jipanditji-coreweb-prod
     restart: unless-stopped
     env_file:
