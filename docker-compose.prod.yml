@@ -44,6 +44,7 @@ services:
       target: production
       args:
         APP_ENV: prod
+        NEXT_PUBLIC_BACKEND_HOSTED_URL: https://backend.jipanditji.com
     container_name: jipanditji-coreweb-prod
     restart: unless-stopped
     env_file:
@@ -64,6 +65,7 @@ services:
       target: production
       args:
         APP_ENV: prod
+        VITE_BACKEND_HOSTED_URL: https://backend.jipanditji.com
     container_name: jipanditji-toolbox-prod
     restart: unless-stopped
     env_file:

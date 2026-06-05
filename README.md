@@ -100,7 +100,7 @@ Routes:
 - `cdn.backend.jipanditji.com` -> public uploads and protected WebDAV uploads
 - `dev.backend.jipanditji.com` -> dev backend on `localhost:5001` with HTTPS
 - `testing.backend.jipanditji.com` -> testing backend on `localhost:5002` with HTTPS
-- `backendjipanditji.com` -> production backend on `localhost:5003`
+- `backend.jipanditji.com` -> production backend on `localhost:5003`
 - `dev.jipanditji.com` -> dev core web on `localhost:3000`
 - `testing.jipanditji.com` -> testing core web on `localhost:3001`
 - `jipanditji.com` and `www.jipanditji.com` -> production core web on `localhost:3002`
@@ -137,7 +137,7 @@ Production Nginx routes:
 
 - `jipanditji.com` and `www.jipanditji.com` -> core web
 - `toolbox.jipanditji.com` -> toolbox web
-- `backendjipanditji.com` -> backend API
+- `backend.jipanditji.com` -> backend API
 
 ## Logs
 
