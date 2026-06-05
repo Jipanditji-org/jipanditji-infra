@@ -13,5 +13,5 @@ services:
     volumes:
       - ./nginx/all-regions.conf:/etc/nginx/conf.d/default.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - ${CDN_UPLOADS_PATH:-/var/www/jipanditji/uploads}:/var/www/jipanditji/uploads
+      - ${CDN_UPLOADS_PATH:-/var/www/jipanditji/uploads}:/var/www/jipanditji/uploads:z
       - ${CDN_HTPASSWD_PATH:-/etc/nginx/.htpasswd}:/etc/nginx/.htpasswd:ro
